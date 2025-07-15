@@ -1,0 +1,325 @@
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: #f0f8ff;
+}
+
+header {
+    position: relative;
+    width: 100%;
+    background-color: #7c5c42;
+    color: white;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    box-sizing: border-box;
+    height: 75px
+    }
+
+    .admin-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      padding: 1.5rem 2rem;
+    }
+
+    .admin-buttons button {
+      background-color: #d5c1a0;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.3s;
+    }
+
+    .admin-buttons button:hover {
+      background-color: #b8a27e;
+    }
+
+.data-table {
+    width: 98%;
+    border-collapse: collapse;
+    background-color: #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    border-radius: 10px;
+    overflow: hidden;
+    text-align: center;
+    margin: 0px auto;
+    }
+
+    .data-table thead {
+    background-color: #7c5c42;
+    color: white;
+    }
+
+    .data-table th,
+    .data-table td {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    text-align: center;
+    }
+
+    .data-table tbody tr:nth-child(even) {
+    background-color: #f0e8dd;
+    }
+
+    .data-table tbody tr:hover {
+    background-color: #e4d7c3;
+    }
+
+    .data-table td {
+      font-size: 18 px
+    }
+
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 10;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background-color: rgba(0, 0, 0, 0.6);
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  overflow: auto;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 600px;
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+  animation: fadeIn 0.3s ease-in-out;
+  font-family: 'Segoe UI', sans-serif;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.modal-content label {
+  display: block;
+  margin-top: 1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.modal-content input {
+  width: 100%;
+  padding: 0.6rem;
+  margin-top: 0.4rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.modal-buttons button {
+  padding: 0.6rem 1.4rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s ease-in-out;
+}
+
+.modal-buttons button[type="submit"] {
+  background-color:#7c5c42;
+  color: white;
+}
+
+.modal-buttons button[type="submit"]:hover {
+  background-color:#7c5c42;
+}
+
+.modal-buttons button[type="button"] {
+  background-color: #ccc;
+  color: #333;
+}
+
+.modal-buttons button[type="button"]:hover {
+  background-color: #999;
+}
+
+#operaciones-container > div {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+#agregar-operacion {
+  margin-top: 1rem;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 0.5rem 1.2rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#eliminar-operacion:hover {
+  background-color:rgb(159, 12, 12);
+}
+
+#operaciones-container > div {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+#eliminar-operacion {
+  margin-top: 1rem;
+  background-color:rgb(208, 6, 6);
+  color: white;
+  border: none;
+  padding: 0.5rem 1.2rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#eliminar-operacion:hover {
+  background-color:rgb(187, 0, 0);
+}
+
+.modal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .modal-grid .field-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .modal-content input,
+ .modal-content select,
+.modal-content input[type="text"],
+.modal-content input[type="number"] {
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+
+
+  .modal-content h3 {
+    grid-column: 1 / -1;
+    margin-top: 1rem;
+  }
+
+  .modal-buttons {
+    margin-top: 20px;
+    text-align: right;
+  }
+
+  .grid-2-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* Asegúrate de incluir esto en tu CSS */
+.operaciones-grid {
+  display: flex;
+  flex-direction: row;
+  overflow-x: auto; /* habilita scroll horizontal si es necesario */
+  gap: 16px;
+  padding: 10px 0;
+  max-width: 100%;
+}
+
+.operacion-box {
+  border: 1px solid #ccc;
+  padding: 12px;
+  border-radius: 8px;
+  width: 300px;
+  min-width: 300px;
+  box-sizing: border-box;
+  background-color: #f9f9f9;
+  flex-shrink: 0; /* evita que se reduzcan */
+}
+
+.boton-rojo {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.boton-rojo:hover {
+  background-color: #c0392b;
+}
+
+/* Contenedor de barra */
+.progress-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.progress-text {
+  margin-bottom: 4px;
+  font-weight: bold;
+}
+/* Ajusta */
+.progress-bar-container {
+  background: #ccc;
+  width: 100%;
+  height: 15px;
+  border-radius: 5px;
+  overflow: hidden;
+}
+.progress-bar {
+  background: #4caf50;
+  height: 100%;
+  width: 0%;
+  transition: width 0.3s ease;
+}
+/* Cuando llega a 100% */
+.progress-bar.red {
+  background: red !important;
+}
+
+
+
+
+

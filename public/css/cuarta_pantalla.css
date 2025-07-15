@@ -1,0 +1,69 @@
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: #f0f8ff;
+}
+
+header {
+    position: relative;
+    width: 100%;
+    background-color:rgb(19, 181, 190);
+    color: white;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    box-sizing: border-box;
+    height: 75px
+    }
+
+     table {
+    width: 98%;
+    border-collapse: collapse;
+    background-color: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border-radius: 10px;
+    overflow: hidden;
+    text-align: center;
+    margin: 1px auto;
+    }
+
+    th, td {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    text-align: center;
+    color: black;
+    }
+
+    th {
+      background-color:rgb(19, 181, 190);
+      color: white;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+    tr {
+      background-color: white;
+      transition: background-color 0.2s ease;
+    }
+
+    tr:hover {
+      background-color: #f3e5f5;
+    }
+
+    td {
+      border-bottom: 1.3px solid #ddd;
+      
+    }
+
+#filtro-fecha {
+  font-size: 1.1rem;
+  padding: 8px 12px;
+  width: 150px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin: 15px 20px;
+}
+

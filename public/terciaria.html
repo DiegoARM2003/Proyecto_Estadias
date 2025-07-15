@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/pantalla_terciaria.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <title>Piezas Fabricadas</title>
+</head>
+<body>
+  <header>
+    <h2 id="welcome-text">Piezas Fabricadas</h2>
+    <div style="display: flex; gap: 20px;">
+      <a href="/principal.html" style="color: white; text-decoration: none;"><strong>Principal</strong></a>
+      <a href="/login.html" style="color: white; text-decoration: none;"><strong>Cerrar sesión</strong></a>
+    </div>
+  </header>
+
+  <div class="buscador-con-icono">
+    <input type="text" id="buscador" placeholder="Buscar...">
+    <span class="icono-buscar">
+      🔍
+    </span>
+  </div>
+
+  <table id="tabla-fabricadas">
+    <thead>
+      <tr>
+        <th><strong>CLAVE SP</strong></th>
+        <th><strong>DESCRIPCIÓN</strong></th>
+        <th><strong>NOMBRE MÁQUINA</strong></th>
+        <th><strong>FECHA</strong></th>
+        <th><strong>PIEZAS FABRICADAS</strong></th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Aquí se insertarán los SPs -->
+    </tbody>
+  </table>
+
+  <script>
+    let datosSPs = [];
+
+    async function cargarSPsFabricadas() {
+      try {
+        const res = await fetch('/api/sp');
+        let sps = await res.json();
+
+        // Ordenar numéricamente por Clave_Sp
+        sps.sort((a, b) => {
+          const numA = parseInt(a.Clave_Sp.replace(/\D/g, ''), 10);
+          const numB = parseInt(b.Clave_Sp.replace(/\D/g, ''), 10);
+          return numA - numB;
+        });
+
+        datosSPs = sps;
+        mostrarFiltrados(sps);
+      } catch (error) {
+        console.error('Error al cargar SPs fabricadas:', error);
+      }
+    }
+
+    function formatearFecha(fechaStr) {
+      const fecha = new Date(fechaStr);
+      const dia = String(fecha.getDate()).padStart(2, '0');
+      const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+      const anio = String(fecha.getFullYear()).slice(-4);
+      return `${dia}/${mes}/${anio}`;
+    }
+
+    function mostrarFiltrados(sps) {
+      const tbody = document.querySelector('#tabla-fabricadas tbody');
+      tbody.innerHTML = '';
+
+      if (sps.length === 0) {
+        const fila = document.createElement('tr');
+        fila.innerHTML = `
+          <td colspan="5" style="text-align: center; padding: 12px; color: black; font-weight: bold; font-size: 18px">
+            No se encontraron resultados
+          </td>
+        `;
+        tbody.appendChild(fila);
+        return;
+      }
+
+      sps.forEach(sp => {
+        const nombreMaquina = sp.Operaciones?.find(op => op.Operacion === sp.Operacion_Actual)?.Nombre_Maquina || '';
+        const fechaFormateada = sp.Fecha ? formatearFecha(sp.Fecha) : '';
+
+        const fila = document.createElement('tr');
+        fila.innerHTML = `
+          <td>${sp.Clave_Sp}</td>
+          <td>${sp.Descripcion}</td>
+          <td>${nombreMaquina}</td>
+          <td>${fechaFormateada}</td>
+          <td>${sp.Piezas_Completadas || 0}</td>
+        `;
+        tbody.appendChild(fila);
+      });
+    }
+
+    async function actualizarPiezasFabricadas() {
+      try {
+        const res = await fetch('/api/sp');
+        let sps = await res.json();
+
+        const tbody = document.querySelector('#tabla-fabricadas tbody');
+        const filas = tbody.querySelectorAll('tr');
+
+        sps.forEach(sp => {
+          const fila = Array.from(filas).find(f => f.children[0]?.textContent === sp.Clave_Sp);
+          if (fila) {
+            fila.children[4].textContent = sp.Piezas_Completadas || 0;
+          }
+        });
+      } catch (error) {
+        console.error('Error actualizando piezas:', error);
+      }
+    }
+
+    document.getElementById('buscador').addEventListener('input', e => {
+      const texto = e.target.value.toLowerCase();
+      const filtrados = datosSPs.filter(sp => {
+        const nombreMaquina = sp.Operaciones?.find(op => op.Operacion === sp.Operacion_Actual)?.Nombre_Maquina || '';
+        const fechaFormateada = sp.Fecha ? formatearFecha(sp.Fecha) : '';
+        return (
+          sp.Clave_Sp.toLowerCase().includes(texto) ||
+          (sp.Descripcion || '').toLowerCase().includes(texto) ||
+          nombreMaquina.toLowerCase().includes(texto) ||
+          fechaFormateada.includes(texto)
+        );
+      });
+      mostrarFiltrados(filtrados);
+    });
+
+    window.onload = () => {
+      cargarSPsFabricadas();
+      setInterval(actualizarPiezasFabricadas, 5000);
+    };
+  </script>
+</body>
+</html>

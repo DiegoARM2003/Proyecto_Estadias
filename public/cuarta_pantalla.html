@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>SPs por Fecha</title>
+  <link rel="stylesheet" href="css/cuarta_pantalla.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+  <header>
+    <h1>SPs por Fecha</h1>
+     <div style="display: flex; gap: 20px;">
+      <a href="/principal.html" style="color: white; text-decoration: none;"><strong>Principal</strong></a>
+      <a href="/login.html" style="color: white; text-decoration: none;"><strong>Cerrar sesión</strong></a>
+    </div>
+  </header>
+
+  <input type="date" id="filtro-fecha">
+  
+
+  <table>
+    <thead>
+      <tr>
+        <th><strong>CLAVE SP</strong></th>
+        <th><strong>DESCRIPCIÓN</strong></th>
+        <th><strong>NOMBRE MAQUINA</strong></th>
+        <th><strong>CLAVE MAQUINA</strong></th>
+        <th><strong>TIEMPO MAQUINA</strong></th>
+        <th><strong>FECHA</strong></th>
+        <th><strong>PIEZAS TOTALES</strong></th>
+        <th><strong>PIEZAS COMPLETADAS</strong></th>
+      </tr>
+    </thead>
+    <tbody id="tabla-body"></tbody>
+  </table>
+
+  <script>
+    let listaSPs = [];
+    let spValidos = new Set();
+
+    async function cargarSPs() {
+      const resValidos = await fetch('/api/sp-validos');
+      const spValidosArray = await resValidos.json();
+      spValidos = new Set(spValidosArray.map(sp => typeof sp === 'string' ? sp : sp.Clave_Sp));
+
+      const res = await fetch('/api/sp');
+      listaSPs = await res.json();
+
+      renderizar();
+    }
+
+    function renderizar() {
+      const tbody = document.getElementById('tabla-body');
+      const mensaje = document.getElementById('mensaje-vacio');
+      tbody.innerHTML = '';
+
+      const filtroFecha = document.getElementById('filtro-fecha').value;
+      const hoy = new Date().toISOString().split('T')[0];
+
+      const spsFiltrados = listaSPs
+        .filter(sp => {
+          if (!spValidos.has(sp.Clave_Sp)) return false;
+          const fecha = sp.Fecha ? sp.Fecha.split('T')[0] : '';
+          return !filtroFecha || fecha === filtroFecha;
+        })
+        .sort((a, b) => {
+          // Extraer parte numérica para ordenación
+          const numA = parseInt(a.Clave_Sp.replace(/\D/g, ''), 10);
+          const numB = parseInt(b.Clave_Sp.replace(/\D/g, ''), 10);
+          return numA - numB;
+        });
+
+      if (spsFiltrados.length === 0) {
+        const filaVacia = document.createElement('tr');
+        filaVacia.innerHTML = `<td class="mensaje-vacio" colspan="9" ><strong>No hay SPs disponibles para esta fecha</strong></td>`;
+        tbody.appendChild(filaVacia);
+        return;
+      }
+
+      spsFiltrados.forEach(sp => {
+        const fecha = sp.Fecha ? sp.Fecha.split('T')[0] : '';
+        let estado = '';
+        if (fecha > hoy) estado = 'Futura';
+        else if (fecha < hoy) estado = 'Pasada';
+        else estado = 'Hoy';
+
+        const operacionActual = sp.Operaciones?.find(op => 
+          op.Operacion === sp.Operacion_Actual
+        ) || {};
+
+        const fila = document.createElement('tr');
+        fila.className = estado === 'Futura' ? 'futuras' :
+                         estado === 'Pasada' ? 'pasadas' : '';
+
+        fila.innerHTML = `
+          <td>${sp.Clave_Sp}</td>
+          <td>${sp.Descripcion}</td>
+          <td>${operacionActual.Nombre_Maquina || ''}</td>
+          <td>${operacionActual.Clave_Maquina || ''}</td>
+          <td>${operacionActual.Tiempo_Maquina || ''} MIN</td>
+          <td>${fecha.split('-').reverse().join('/')}</td>
+          <td>${sp.Piezas_Totales}</td>
+          <td>${sp.Piezas_Completadas}</td>
+          `;
+        tbody.appendChild(fila);
+      });
+    }
+
+    document.getElementById('filtro-fecha').addEventListener('change', renderizar);
+    document.addEventListener('DOMContentLoaded', cargarSPs);
+  </script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Registrarse</title>
+  <link rel="stylesheet" href="css/estilo_sesión.css" />
+</head>
+<body>
+  <form id="register-form">
+    <h2><strong>Crear Cuenta</strong></h2>
+    <input type="text" placeholder="Nombre completo" id="nombre" required>
+    <input type="email" placeholder="Correo electrónico" id="email" required>
+    <input type="password" placeholder="Contraseña" id="password" required>
+    <button type="submit"><strong>Registrarse</strong></button>
+    <p id="message"></p>
+    <p style="margin-top: .2rem; text-align: center;">
+      Ya tienes una cuenta?
+      <a href="login.html" style="color: #7c5c42; text-decoration: underline;"><strong>Inicia sesión aqui</strong></a>
+    </p>
+  </form>
+
+    <!-- Modal de éxito -->
+    <div id="success-modal" style="display: none;">
+    <div class="modal-content">
+        <p id="success-message"></p>
+        <button id="success-ok"><strong>Aceptar</strong></button>
+    </div>
+    </div>
+
+<script>
+  const modal = document.getElementById('success-modal');
+  const messageEl = document.getElementById('success-message');
+  const okButton = document.getElementById('success-ok');
+
+  document.getElementById('register-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const nombre = document.getElementById('nombre').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+
+    const res = await fetch('/api/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nombre, email, password })
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      messageEl.innerText = `Usuario registrado correctamente`;
+      modal.style.display = 'flex';
+    } else {
+      document.getElementById('message').innerText = data.error || 'Error al registrar usuario.';
+    }
+  });
+
+  okButton.addEventListener('click', () => {
+    modal.style.display = 'none';
+    window.location.href = 'login.html';
+  });
+</script>
+</body>
+</html>
