@@ -7,7 +7,8 @@ const User = require('./models/User');
 const Sp = require('./models/Sp');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
+
 
 // Conexión a MongoDB Atlas
 const uri = "mongodb+srv://Diego:drm200318@cluster0.ys6lboo.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
@@ -347,6 +348,10 @@ app.get('/api/sp-validos', async (req, res) => {
 
 // Servir archivos estáticos (React u otros)
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
 
 // Iniciar el servidor
 app.listen(PORT, () => {
