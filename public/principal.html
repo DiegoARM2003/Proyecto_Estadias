@@ -177,7 +177,6 @@
         <th><strong>PIEZAS FALTANTES</strong></th>
         <th><strong>PIEZAS COMPLETADAS</strong></th>
         <th><strong>PROGRESO</strong></th>
-        <th><strong>ELIMINAR</strong></th>
         </tr>
     </thead>
     <tbody id="tabla-registros">
@@ -319,7 +318,6 @@ async function cargarRegistros() {
               </div>
             </div>
           </td>
-          <td><i class="fas fa-trash eliminar-icono" style="cursor:pointer; color:red" data-id="${registro.Clave_Sp}"></i></td>
         `;
         tablaBody.appendChild(fila);
       }
