@@ -177,6 +177,7 @@
         <th><strong>PIEZAS FALTANTES</strong></th>
         <th><strong>PIEZAS COMPLETADAS</strong></th>
         <th><strong>PROGRESO</strong></th>
+        <th><strong>ELIMINAR</strong></th>
         </tr>
     </thead>
     <tbody id="tabla-registros">
@@ -318,18 +319,21 @@ async function cargarRegistros() {
               </div>
             </div>
           </td>
+          <td><i class="fas fa-trash eliminar-icono" style="cursor:pointer; color:red" data-id="${registro.Clave_Sp}"></i></td>
         `;
         tablaBody.appendChild(fila);
       }
     });
 
-    // Si no hay registros, mostrar mensaje
-    if (registrosMostrados === 0) {
-      const fila = document.createElement('tr');
-      fila.innerHTML = `<td colspan="12" style="text-align:center;">No hay SPs disponibles para esta fecha</td>`;
-      tablaBody.appendChild(fila);
-    }
-
+    // Agregar manejador a los iconos de eliminar (solo ocultar de la tabla)
+    document.querySelectorAll('.eliminar-icono').forEach(icono => {
+      icono.addEventListener('click', () => {
+        const fila = icono.closest('tr');
+        if (fila) {
+          fila.remove();
+        }
+      });
+    });
   } catch (err) {
     console.error('Error al cargar la tabla:', err);
   }

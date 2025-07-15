@@ -344,6 +344,18 @@ app.get('/api/sp-validos', async (req, res) => {
   }
 });
 
+// Supongamos que guardamos los ocultos en una tabla temporal
+let registrosOcultos = new Set();
+
+app.post('/api/registros/ocultar', (req, res) => {
+  const { clave } = req.body;
+  if (!clave) {
+    return res.status(400).json({ error: 'Falta clave' });
+  }
+
+  registrosOcultos.add(clave);
+  res.status(200).json({ ok: true });
+});
 
 
 // Servir archivos estáticos (React u otros)
