@@ -91,6 +91,9 @@ app.get('/api/sp/:clave', async (req, res) => {
 // Guardar nuevo SP
 app.post('/api/sp', async (req, res) => {
   const { Clave_Sp, Descripcion, Operaciones, Piezas_Totales, Clave_Mp, Material} = req.body;
+  const ahora = new Date();
+  const fechaLocal = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
+
 
   try {
     const nuevoSp = new Sp({
@@ -100,7 +103,7 @@ app.post('/api/sp', async (req, res) => {
       Operacion_Actual: Operaciones[0]?.Operacion || '', 
       Piezas_Totales,
       Piezas_Completadas: 0,
-      Fecha: new Date(),
+      Fecha: fechaLocal, // Fecha de hoy
       Clave_Mp,
       Material,
     });

@@ -79,10 +79,10 @@ header {
 
 .data-table th {
   font-weight: bold;
-  font-size: 14px; /* ✅ corregido */
+  font-size: 16.5px; /* ✅ corregido */
 }
 .data-table td {
-  font-size: 16px; /* ✅ corregido */
+  font-size: 17px; /* ✅ corregido */
 }
 
 .modal {

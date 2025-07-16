@@ -60,13 +60,17 @@
       }
     }
 
-    function formatearFecha(fechaStr) {
-      const fecha = new Date(fechaStr);
-      const dia = String(fecha.getDate()).padStart(2, '0');
-      const mes = String(fecha.getMonth() + 1).padStart(2, '0');
-      const anio = String(fecha.getFullYear()).slice(-4);
-      return `${dia}/${mes}/${anio}`;
+        function formatearFecha(fechaStr) {
+      const fechaUTC = new Date(fechaStr);
+      // Ajusta a tu zona horaria: Ciudad de México
+      return fechaUTC.toLocaleDateString('es-MX', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        timeZone: 'America/Mexico_City' // esto asegura que se muestre localmente bien
+      });
     }
+
 
     function mostrarFiltrados(sps) {
       const tbody = document.querySelector('#tabla-fabricadas tbody');
