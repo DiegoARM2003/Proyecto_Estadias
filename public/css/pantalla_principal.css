@@ -6,7 +6,7 @@ body {
 
 header {
     position: relative;
-    width: 100%;
+    width: 125%;
     background-color: #7c5c42;
     color: white;
     padding: 1rem 2rem;
@@ -20,10 +20,12 @@ header {
 
     .admin-buttons {
       display: flex;
-      justify-content: flex-end;
+      justify-content: flex-end; /* Alineados a la derecha */
       gap: 1rem;
-      padding: 1.5rem 2rem;
+      margin: 1.5rem auto 2rem auto; /* Espacio arriba/abajo y centrado en ancho */
+      width: 122%; /* Hace que los botones estén alineados con la tabla */
     }
+
 
     .admin-buttons button {
       background-color: #d5c1a0;
@@ -39,41 +41,49 @@ header {
       background-color: #b8a27e;
     }
 
+.tabla-wrapper {
+  padding: 0 20px; /* Espacio a los lados izquierdo y derecho */
+  box-sizing: border-box;
+}
+
 .data-table {
-    width: 98%;
-    border-collapse: collapse;
-    background-color: #fff;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    border-radius: 10px;
-    overflow: hidden;
-    text-align: center;
-    margin: 0px auto;
-    }
+  width: 100%; /* Ya no necesitas limitar el ancho aquí */
+  border-collapse: collapse;
+  background-color: #fff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  border-radius: 10px;
+  overflow: hidden;
+  text-align: center;
+  margin: 0 auto;
+}
 
-    .data-table thead {
-    background-color: #7c5c42;
-    color: white;
-    }
+.data-table thead {
+  background-color: #7c5c42;
+  color: white;
+}
 
-    .data-table th,
-    .data-table td {
-    padding: 0.5rem;
-    border: 1px solid #ddd;
-    text-align: center;
-    }
+.data-table th,
+.data-table td {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  text-align: center;
+}
 
-    .data-table tbody tr:nth-child(even) {
-    background-color: #f0e8dd;
-    }
+.data-table tbody tr:nth-child(even) {
+  background-color: #f0e8dd;
+}
 
-    .data-table tbody tr:hover {
-    background-color: #e4d7c3;
-    }
+.data-table tbody tr:hover {
+  background-color: #e4d7c3;
+}
 
-    .data-table td {
-      font-size: 18 px
-    }
-
+.data-table th {
+  font-weight: bold;
+  font-size: 14px; /* ✅ corregido */
+}
+.data-table td {
+  font-size: 16px; /* ✅ corregido */
+}
 
 .modal {
   display: none;

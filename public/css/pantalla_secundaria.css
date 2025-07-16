@@ -16,6 +16,7 @@ body {
       padding: 16px 24px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
       height: 40px;
+      width: 128%;
     }
 
     .usuario {
@@ -46,9 +47,14 @@ body {
       color: #ffffff;
       margin-bottom: 10px;
     }
+    
+    .tabla-wrapper {
+      padding: 0 20px; /* Espacio de 20px a los lados izquierdo y derecho */
+      box-sizing: border-box;
+    }
 
     table {
-    width: 98%;
+    width: 100%;
     border-collapse: collapse;
     background-color: #fff;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
@@ -84,7 +90,7 @@ body {
 
     td {
       border-bottom: 1.3px solid #ddd;
-      font-size: 18px
+      font-size: 17px
       
     }
 
