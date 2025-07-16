@@ -37,7 +37,7 @@ app.post('/api/register', async (req, res) => {
     return res.status(400).json({ error: 'Todos los campos son obligatorios' });
   }
 
-  const domain = email.split('@')[1];
+  const domain = email.split('@')[50];
   const role = domain === 'planeacion.com' ? 'user' : 'admin';
 
   try {
