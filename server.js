@@ -12,10 +12,7 @@ const PORT = process.env.PORT || 3000;
 
 // Conexión a MongoDB Atlas
 const uri = "mongodb+srv://Diego:drm200318@cluster0.ys6lboo.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
-mongoose.connect(uri, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
+mongoose.connect(uri)
 .then(() => {
   console.log("Conectado a MongoDB Atlas!");
 })
