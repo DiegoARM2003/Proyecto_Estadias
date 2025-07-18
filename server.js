@@ -28,14 +28,16 @@ app.use(bodyParser.json());
 
 // Registro de usuario
 app.post('/api/register', async (req, res) => {
-  const { nombre, email, password } = req.body;
+  let { nombre, email, password } = req.body;
 
   if (!nombre || !email || !password) {
     return res.status(400).json({ error: 'Todos los campos son obligatorios' });
   }
 
-  const domain = email.split('@')[50];
-  const role = domain === 'planeacion.com' ? 'user' : 'admin';
+  email = email.trim().toLowerCase();
+  const domain = email.includes('@') ? email.split('@')[1] : '';
+
+  const role = domain === 'planeacion.com' ? 'admin' : 'user';
 
   try {
     const user = new User({ nombre, email, password, role });
@@ -90,7 +92,6 @@ app.post('/api/sp', async (req, res) => {
   const { Clave_Sp, Descripcion, Operaciones, Piezas_Totales, Clave_Mp, Material} = req.body;
   const ahora = new Date();
   const fechaLocal = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
-
 
   try {
     const nuevoSp = new Sp({
@@ -195,12 +196,10 @@ app.get('/api/registros', async (req, res) => {
   }
 });
 
-
 function calcularProgreso(totales, completadas) {
   if (!totales || totales === 0) return 0;
   return Math.floor((completadas / totales) * 100);
 }
-
 
 app.put('/api/sp/:clave', async (req, res) => {
   const { clave } = req.params;
@@ -255,7 +254,6 @@ app.put('/api/sp/:clave', async (req, res) => {
     res.status(500).json({ error: 'Error al actualizar SP' });
   }
 });
-
 
 // Actualiza piezas completadas de un SP
 app.put('/api/registros/:clave/completadas', async (req, res) => {
@@ -343,20 +341,6 @@ app.get('/api/sp-validos', async (req, res) => {
     res.status(500).json({ error: 'Error al obtener SP válidos' });
   }
 });
-
-// Supongamos que guardamos los ocultos en una tabla temporal
-let registrosOcultos = new Set();
-
-app.post('/api/registros/ocultar', (req, res) => {
-  const { clave } = req.body;
-  if (!clave) {
-    return res.status(400).json({ error: 'Falta clave' });
-  }
-
-  registrosOcultos.add(clave);
-  res.status(200).json({ ok: true });
-});
-
 
 // Servir archivos estáticos (React u otros)
 app.use(express.static(path.join(__dirname, 'public')));
