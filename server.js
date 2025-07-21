@@ -35,7 +35,7 @@ app.post('/api/register', async (req, res) => {
   }
 
   email = email.trim().toLowerCase();
-  const domain = email.includes('@') ? email.split('@')[1] : '';
+  const domain = email.includes('@') ? email.split('@')[2] : '';
 
   const role = domain === 'planeacion.com' ? 'admin' : 'user';
 
