@@ -35,9 +35,9 @@ app.post('/api/register', async (req, res) => {
   }
 
   email = email.trim().toLowerCase();
-  const domain = email.includes('@') ? email.split('@')[2] : '';
+  const domain = email.includes('@') ? email.split('@')[1] : '';
 
-  const role = domain === 'planeacion.com' ? 'user' : 'admin';
+  const role = domain === 'planeacion.com' ? 'admin' : 'user';
 
   try {
     const user = new User({ nombre, email, password, role });
@@ -130,7 +130,6 @@ app.put('/api/sp/piezas/:clave', async (req, res) => {
         sp.Fecha = fechaValida;
       }
     }
-
     await sp.save();
     res.json({ message: 'SP actualizado correctamente' });
   } catch (error) {
@@ -157,7 +156,6 @@ app.get('/api/registros', async (req, res) => {
       $expr: { $lt: ["$Piezas_Completadas", "$Piezas_Totales"] },
       Fecha: { $gte: inicioDiaUTC, $lte: finDiaUTC } // Solo hoy
     });
-
     const registrosAnteriores = await Sp.find({
       Piezas_Totales: { $gt: 0 },
       $expr: { $lt: ["$Piezas_Completadas", "$Piezas_Totales"] },
@@ -165,9 +163,8 @@ app.get('/api/registros', async (req, res) => {
     });
 
     const todosRegistros = [...registrosAnteriores, ...registros];
-
-      const tablaFormateada = todosRegistros.flatMap(sp => {
-      const operacionActual = sp.Operacion_Actual || (sp.Operaciones[0]?.Operacion || '');
+    const tablaFormateada = todosRegistros.flatMap(sp => {
+    const operacionActual = sp.Operacion_Actual || (sp.Operaciones[0]?.Operacion || '');
 
       return sp.Operaciones.map(op => ({
         Clave_Sp: sp.Clave_Sp,
@@ -265,7 +262,6 @@ app.put('/api/registros/:clave/completadas', async (req, res) => {
     if (!sp) {
       return res.status(404).json({ error: 'SP no encontrado' });
     }
-
     // Actualiza piezas completadas
     sp.Piezas_Completadas = piezasCompletadas;
     await sp.save();
@@ -309,8 +305,6 @@ app.put('/api/registros/:clave/completadas', async (req, res) => {
         nuevaOperacionActual = siguientePaso.Operacion;
       }
     }
-
-
     res.json({
       message: 'Actualizado correctamente',
       piezasFaltantes,
