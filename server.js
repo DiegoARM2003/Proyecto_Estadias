@@ -9,7 +9,6 @@ const Sp = require('./models/Sp');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-
 // Conexión a MongoDB Atlas
 const uri = "mongodb+srv://Diego:drm200318@cluster0.ys6lboo.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
 mongoose.connect(uri)
@@ -23,8 +22,6 @@ mongoose.connect(uri)
 // Middlewares
 app.use(cors());
 app.use(bodyParser.json());
-
-// Rutas API
 
 // Registro de usuario
 app.post('/api/register', async (req, res) => {
@@ -89,27 +86,50 @@ app.get('/api/sp/:clave', async (req, res) => {
 
 // Guardar nuevo SP
 app.post('/api/sp', async (req, res) => {
-  const { Clave_Sp, Descripcion, Operaciones, Piezas_Totales, Clave_Mp, Material} = req.body;
+  const { Clave_Sp, Descripcion, Operaciones, Piezas_Totales, Clave_Mp, Material } = req.body;
   const ahora = new Date();
   const fechaLocal = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
 
   try {
-    const nuevoSp = new Sp({
-      Clave_Sp,
-      Descripcion,
-      Operaciones,
-      Operacion_Actual: Operaciones[0]?.Operacion || '', 
-      Piezas_Totales,
-      Piezas_Completadas: 0,
-      Fecha: fechaLocal, // Fecha de hoy
-      Clave_Mp,
-      Material,
-    });
+    let sp = await Sp.findOne({ Clave_Sp });
 
-    await nuevoSp.save();
-    res.status(201).json(nuevoSp);
+    if (sp) {
+      if (sp.Oculto) {
+        // Reactivar y resetear datos
+        sp.Oculto = false;
+        sp.Descripcion = Descripcion;
+        sp.Operaciones = Operaciones;
+        sp.Operacion_Actual = Operaciones[0]?.Operacion || '';
+        sp.Piezas_Totales = Piezas_Totales;
+        sp.Piezas_Completadas = 0;
+        sp.Fecha = fechaLocal;
+        sp.Clave_Mp = Clave_Mp;
+        sp.Material = Material;
+
+        await sp.save();
+        return res.status(200).json({ message: 'SP reactivado y actualizado', sp });
+      } else {
+        return res.status(400).json({ error: 'SP con esa clave ya existe' });
+      }
+    } else {
+      // Crear nuevo SP
+      const nuevoSp = new Sp({
+        Clave_Sp,
+        Descripcion,
+        Operaciones,
+        Operacion_Actual: Operaciones[0]?.Operacion || '',
+        Piezas_Totales,
+        Piezas_Completadas: 0,
+        Fecha: fechaLocal,
+        Clave_Mp,
+        Material,
+      });
+
+      await nuevoSp.save();
+      return res.status(201).json({ message: 'SP creado', sp: nuevoSp });
+    }
   } catch (err) {
-    console.error('Error al crear el SP:', err);
+    console.error('Error al crear o reactivar el SP:', err);
     res.status(500).json({ error: 'Error al guardar SP' });
   }
 });
@@ -123,6 +143,7 @@ app.put('/api/sp/piezas/:clave', async (req, res) => {
     if (!sp) return res.status(404).json({ error: 'SP no encontrado' });
 
     sp.Piezas_Totales = piezasTotales;
+    sp.Oculto = false;  // Reactivar el SP
 
     if (fecha) {
       const fechaValida = new Date(fecha);
@@ -140,37 +161,20 @@ app.put('/api/sp/piezas/:clave', async (req, res) => {
 
 app.get('/api/registros', async (req, res) => {
   try {
-    const hoy = new Date();
-
-    // Ajusta la zona horaria local (por ejemplo UTC-6)
-    const offsetHoras = hoy.getTimezoneOffset() / 60; // Diferencia con UTC (en horas)
-    const inicioDiaLocal = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
-    const finDiaLocal = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), 23, 59, 59, 999);
-
-    // Corrige las fechas a UTC para comparar con MongoDB
-    const inicioDiaUTC = new Date(inicioDiaLocal.getTime() - offsetHoras * 60 * 60 * 1000);
-    const finDiaUTC = new Date(finDiaLocal.getTime() - offsetHoras * 60 * 60 * 1000);
-
     const registros = await Sp.find({
+      Oculto: { $ne: true },
       Piezas_Totales: { $gt: 0 },
-      $expr: { $lt: ["$Piezas_Completadas", "$Piezas_Totales"] },
-      Fecha: { $gte: inicioDiaUTC, $lte: finDiaUTC } // Solo hoy
-    });
-    const registrosAnteriores = await Sp.find({
-      Piezas_Totales: { $gt: 0 },
-      $expr: { $lt: ["$Piezas_Completadas", "$Piezas_Totales"] },
-      Fecha: { $lt: inicioDiaUTC } // Solo días anteriores incompletos
+      $expr: { $lt: ["$Piezas_Completadas", "$Piezas_Totales"] }
     });
 
-    const todosRegistros = [...registrosAnteriores, ...registros];
-    const tablaFormateada = todosRegistros.flatMap(sp => {
-    const operacionActual = sp.Operacion_Actual || (sp.Operaciones[0]?.Operacion || '');
+    const tablaFormateada = registros.flatMap(sp => {
+      const operacionActual = sp.Operacion_Actual || (sp.Operaciones[0]?.Operacion || '');
 
       return sp.Operaciones.map(op => ({
         Clave_Sp: sp.Clave_Sp,
         Descripcion: sp.Descripcion,
-        Clave_Mp: sp.Clave_Mp,  
-        Material: sp.Material, 
+        Clave_Mp: sp.Clave_Mp,
+        Material: sp.Material,
         Operacion: op.Operacion,
         Nombre_Maquina: op.Nombre_Maquina,
         Clave_Maquina: op.Clave_Maquina,
@@ -178,11 +182,11 @@ app.get('/api/registros', async (req, res) => {
         Operacion_Actual: operacionActual,
         Fecha: sp.Fecha ? sp.Fecha.toISOString().split('T')[0] : '',
         Piezas_Totales: sp.Piezas_Totales,
-        Piezas_Completadas: sp.Piezas_Completadas,
-        Piezas_Faltantes: sp.Piezas_Totales - sp.Piezas_Completadas,
+        Piezas_Completadas: sp.Piezas_Completadas ?? 0, // <-- Aquí garantizamos que no sea null ni undefined
+        Piezas_Faltantes: sp.Piezas_Totales - (sp.Piezas_Completadas ?? 0),
         Progreso: typeof calcularProgreso(sp.Piezas_Totales, sp.Piezas_Completadas) === 'number'
           ? calcularProgreso(sp.Piezas_Totales, sp.Piezas_Completadas)
-          : parseFloat(calcularProgreso(sp.Piezas_Totales, sp.Piezas_Completadas)) || 0
+          : 0
       }));
     });
 
@@ -195,7 +199,7 @@ app.get('/api/registros', async (req, res) => {
 
 function calcularProgreso(totales, completadas) {
   if (!totales || totales === 0) return 0;
-  return Math.floor((completadas / totales) * 100);
+  return Math.floor(((completadas ?? 0) / totales) * 100);
 }
 
 app.put('/api/sp/:clave', async (req, res) => {
@@ -210,7 +214,7 @@ app.put('/api/sp/:clave', async (req, res) => {
     clave_mp,
     material,
     fecha,
-    nueva_clave_sp  // ← Nuevo campo recibido
+    nueva_clave_sp
   } = req.body;
 
   try {
@@ -218,24 +222,23 @@ app.put('/api/sp/:clave', async (req, res) => {
     if (!sp) return res.status(404).json({ error: 'SP no encontrado' });
 
     // Actualizar operación específica
-    sp.Operaciones[operacionIndex].Nombre_Maquina = nombre_maquina;
-    sp.Operaciones[operacionIndex].Clave_Maquina = clave_maquina;
-    sp.Operaciones[operacionIndex].Tiempo_Maquina = tiempo_maquina;
+    if (typeof operacionIndex === 'number' && sp.Operaciones[operacionIndex]) {
+      sp.Operaciones[operacionIndex].Nombre_Maquina = nombre_maquina;
+      sp.Operaciones[operacionIndex].Clave_Maquina = clave_maquina;
+      sp.Operaciones[operacionIndex].Tiempo_Maquina = tiempo_maquina;
+    }
 
     // Actualizar campos generales
     sp.Piezas_Totales = piezas_totales;
     sp.Descripcion = descripcion;
 
-    // Actualizar Clave_MP y Material correctamente
     if (typeof clave_mp !== 'undefined') sp.Clave_Mp = clave_mp;
     if (typeof material !== 'undefined') sp.Material = material;
 
-    // Actualizar Fecha si se envió
     if (fecha) {
       sp.Fecha = new Date(fecha);
     }
 
-    // ✅ Actualizar Clave SP si se envió y es diferente
     if (nueva_clave_sp && nueva_clave_sp !== clave) {
       const spExistente = await Sp.findOne({ Clave_Sp: nueva_clave_sp });
       if (spExistente) {
@@ -262,23 +265,23 @@ app.put('/api/registros/:clave/completadas', async (req, res) => {
     if (!sp) {
       return res.status(404).json({ error: 'SP no encontrado' });
     }
-    // Actualiza piezas completadas
-    sp.Piezas_Completadas = piezasCompletadas;
+    // Actualiza piezas completadas (asegurar no undefined)
+    sp.Piezas_Completadas = piezasCompletadas ?? 0;
     await sp.save();
 
-    const piezasFaltantes = sp.Piezas_Totales - piezasCompletadas;
-    const progreso = calcularProgreso(sp.Piezas_Totales, piezasCompletadas);
+    const piezasFaltantes = sp.Piezas_Totales - sp.Piezas_Completadas;
+    const progreso = calcularProgreso(sp.Piezas_Totales, sp.Piezas_Completadas);
 
     let pasoAvanzado = null;
     let nuevaOperacionActual = null;
 
     // Si se completa al 100%, pasar al siguiente paso
-      if (progreso >= 100) {
+    if (progreso >= 100) {
       const operaciones = sp.Operaciones || [];
       const operacionActual = sp.Operacion_Actual;
 
       const idxActual = operaciones.findIndex(op =>
-        op.Operacion.trim().toLowerCase() === operacionActual.trim().toLowerCase()
+        op.Operacion.trim().toLowerCase() === (operacionActual?.trim().toLowerCase() || '')
       );
 
       if (idxActual === -1) {
@@ -289,12 +292,11 @@ app.put('/api/registros/:clave/completadas', async (req, res) => {
       const siguientePaso = operaciones[idxActual + 1];
 
       if (siguientePaso) {
-        // 👇 Copiar el valor de piezasCompletadas como nuevas piezasTotales
-        sp.Piezas_Totales = piezasCompletadas; // ✅ Este valor se usará en la siguiente operación
-        sp.Piezas_Completadas = 0;             // Reinicia para la nueva operación
+        sp.Piezas_Totales = piezasCompletadas; // Nuevas piezas totales para siguiente paso
+        sp.Piezas_Completadas = 0;             // Reiniciar piezas completadas
         sp.Operacion_Actual = siguientePaso.Operacion;
-        
-        await sp.save(); // Guarda todo junto
+
+        await sp.save();
 
         pasoAvanzado = {
           Nombre_Maquina: siguientePaso.Nombre_Maquina,
@@ -320,12 +322,9 @@ app.put('/api/registros/:clave/completadas', async (req, res) => {
 
 app.get('/api/sp-validos', async (req, res) => {
   try {
-    // Traemos SPs que tengan piezas totales > 0 (o el criterio para "agregados")
-    // Incluye SPs con cualquier fecha, sea pasada, hoy o futura
     const spValidos = await Sp.find({
       Piezas_Totales: { $gt: 0 }
-      // No filtro por fecha
-    }).select('Clave_Sp -_id'); // Solo clave
+    }).select('Clave_Sp -_id');
 
     const claves = spValidos.map(sp => sp.Clave_Sp);
 
@@ -333,6 +332,31 @@ app.get('/api/sp-validos', async (req, res) => {
   } catch (error) {
     console.error('Error al obtener SP válidos:', error);
     res.status(500).json({ error: 'Error al obtener SP válidos' });
+  }
+});
+
+// Ocultar SP y reiniciar valores
+app.post('/api/sp/:clave/ocultar', async (req, res) => {
+  const clave = req.params.clave;
+
+  try {
+    const sp = await Sp.findOne({ Clave_Sp: clave });
+
+    if (!sp) {
+      return res.status(404).json({ error: 'SP no encontrado' });
+    }
+
+    sp.Piezas_Completadas = 0;
+    sp.Operacion_Actual = sp.Operaciones[0]?.Operacion || '';
+    sp.Fecha = null;
+    sp.Oculto = true;
+
+    await sp.save();
+
+    res.status(200).json({ mensaje: 'SP ocultado y reiniciado con éxito' });
+  } catch (error) {
+    console.error('Error ocultando SP:', error);
+    res.status(500).json({ error: 'Error del servidor' });
   }
 });
 

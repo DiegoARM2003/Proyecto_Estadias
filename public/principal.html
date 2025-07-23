@@ -128,6 +128,9 @@
       <label>Descripción:</label>
       <input type="text" id="input-descripcion" required />
 
+      <label>Fecha:</label>
+      <input type="date" id="input-fecha" required />
+
       <div class="grid-2-cols">
         <div>
           <label>Nombre Máquina:</label>
@@ -166,18 +169,19 @@
       <tr>
         <th><strong>CLAVE SP</strong></th>
         <th><strong>DESCRIPCIÓN</strong></th>
+        <th><strong>CLAVE MAQUINA</strong></th>
+        <th><strong>NOMBRE MAQUINA</strong></th>
+        <th><strong>TIEMPO MAQUINA</strong></th>
+        <th><strong>OPERACIÓN</strong></th>
+        <th><strong>OPERACIÓN ACTUAL</strong></th>
         <th><strong>CLAVE MP</strong></th>
         <th><strong>MATERIAL</strong></th>
-        <th><strong>OPERACIÓN</strong></th>
-        <th><strong>NOMBRE MAQUINA</strong></th>
-        <th><strong>CLAVE MAQUINA</strong></th>
-        <th><strong>TIEMPO MAQUINA</strong></th>
-        <th><strong>OPERACIÓN ACTUAL</strong></th>
         <th><strong>FECHA</strong></th>
         <th><strong>PIEZAS TOTALES</strong></th>
         <th><strong>PIEZAS FALTANTES</strong></th>
         <th><strong>PIEZAS COMPLETADAS</strong></th>
         <th><strong>PROGRESO</strong></th>
+        <th><strong>ACCIONES</strong></th>
       </tr>
     </thead>
     <tbody id="tabla-registros">
@@ -230,113 +234,50 @@ async function cargarRegistros() {
     }
     tablaBody.innerHTML = ''; // Limpia filas previas
 
-    const spMap = new Map();
     data.forEach(registro => {
-      const clave = registro.Clave_Sp;
-      if (!spMap.has(clave)) {
-        spMap.set(clave, {
-          Clave_Sp: registro.Clave_Sp,
-          Descripcion: registro.Descripcion,
-          Clave_MP: registro.Clave_Mp,
-          Material: registro.Material,
-          Operaciones: [{
-            Operacion: registro.Operacion,
-            Nombre_Maquina: registro.Nombre_Maquina,
-            Clave_Maquina: registro.Clave_Maquina,
-            Tiempo_Maquina: registro.Tiempo_Maquina
-          }],
-          Operacion_Actual: registro.Operacion_Actual,
-          Fecha: registro.Fecha,
-          Piezas_Totales: registro.Piezas_Totales,
-          Piezas_Faltantes: registro.Piezas_Faltantes,
-          Piezas_Completadas: registro.Piezas_Completadas,
-          Progreso: typeof registro.Progreso === 'number'
-            ? registro.Progreso
-            : parseFloat(registro.Progreso) || 0
-        });
-      } else {
-        const sp = spMap.get(clave);
-        sp.Operaciones.push({
-          Operacion: registro.Operacion,
-          Nombre_Maquina: registro.Nombre_Maquina,
-          Clave_Maquina: registro.Clave_Maquina,
-          Tiempo_Maquina: registro.Tiempo_Maquina
-        });
-
-        // Si faltan Clave_MP o Material, actualízalos
-        if (!sp.Clave_MP && registro.Clave_MP) sp.Clave_MP = registro.Clave_MP;
-        if (!sp.Material && registro.Material) sp.Material = registro.Material;
-      }
-    });
-
-    // Ordenar por fecha antigua primero
-    const registrosOrdenados = Array.from(spMap.values()).sort((a, b) => {
-      const fechaA = a.Fecha ? new Date(a.Fecha) : new Date(0);
-      const fechaB = b.Fecha ? new Date(b.Fecha) : new Date(0);
-      return fechaA - fechaB; // Antiguos primero
-    });
-
-    let registrosMostrados = 0;
-    const hoy = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
-
-    registrosOrdenados.forEach(registro => {
+      if (registro.Oculto) return;
       const fechaRegistro = registro.Fecha ? registro.Fecha.slice(0, 10) : '';
-      const mostrar = (registro.Progreso < 100) && (fechaRegistro <= hoy);
+      const mostrar = (registro.Progreso < 100); // sin filtro de fecha
 
       if (mostrar) {
-        registrosMostrados++;
-        const operaciones = registro.Operaciones || [];
-        let pasoActual = operaciones.find(op => op.Operacion === registro.Operacion_Actual);
-        if (!pasoActual) {
-          pasoActual = operaciones[0]; // fallback
-          registro.Operacion_Actual = pasoActual?.Operacion || '';
-        }
-        const pasosTexto = operaciones.map((_, i) => `PASO ${i + 1}`).join('<br>');
         const progresoPorcentaje = Math.min(100, Math.max(0, Math.round(registro.Progreso)));
-        const fechaTexto = registro.Fecha ? registro.Fecha.slice(0, 10).split('-').reverse().join('/') : '';
+        const fechaTexto = fechaRegistro ? fechaRegistro.split('-').reverse().join('/') : '';
 
         const fila = document.createElement('tr');
         fila.innerHTML = `
           <td>${registro.Clave_Sp}</td>
-          <td>${registro.Descripcion}</td>
-          <td>${registro.Clave_Mp || registro.Clave_MP || ''}</td>
-          <td>${registro.Material || ''}</td>
-          <td>${pasosTexto}</td>
-          <td>${pasoActual.Nombre_Maquina || ''}</td>
-          <td>${pasoActual.Clave_Maquina || ''}</td>
-          <td>${pasoActual.Tiempo_Maquina || ''} MIN</td>
+          <td>${registro.Descripcion || ''}</td>
+          <td>${registro.Clave_Maquina || ''}</td>
+          <td>${registro.Nombre_Maquina || ''}</td>
+          <td>${registro.Tiempo_Maquina || ''} MIN</td>
+          <td>${registro.Operacion || ''}</td>
           <td>${registro.Operacion_Actual || ''}</td>
+          <td>${registro.Clave_Mp || ''}</td>
+          <td>${registro.Material || ''}</td>
           <td>${fechaTexto}</td>
-          <td>${registro.Piezas_Totales}</td>
-          <td>${registro.Piezas_Faltantes}</td>
-          <td>${registro.Piezas_Completadas}</td>
+          <td>${registro.Piezas_Totales != null ? registro.Piezas_Totales : 0}</td>
+          <td>${registro.Piezas_Faltantes != null ? registro.Piezas_Faltantes : 0}</td>
+          <td>${registro.Piezas_Completadas != null ? registro.Piezas_Completadas : 0}</td>
           <td>
             <div class="progress-wrapper">
               <div class="progress-text">${progresoPorcentaje}%</div>
               <div class="progress-bar-container">
-                <div class="progress-bar" style="width:${progresoPorcentaje}%;" 
-                    ${progresoPorcentaje === 100 ? 'class="progress-bar red"' : ''}></div>
+                <div class="progress-bar ${progresoPorcentaje === 100 ? 'red' : ''}" style="width:${progresoPorcentaje}%"></div>
               </div>
             </div>
+          </td>
+          <td>
+            <button class="btn-borrar-fila" title="Eliminar fila">🗑️</button>
           </td>
         `;
         tablaBody.appendChild(fila);
       }
     });
-
-    // Agregar manejador a los iconos de eliminar (solo ocultar de la tabla)
-    document.querySelectorAll('.eliminar-icono').forEach(icono => {
-      icono.addEventListener('click', () => {
-        const fila = icono.closest('tr');
-        if (fila) {
-          fila.remove();
-        }
-      });
-    });
   } catch (err) {
     console.error('Error al cargar la tabla:', err);
   }
 }
+
 
   document.addEventListener('DOMContentLoaded', cargarRegistros);
 
@@ -531,7 +472,14 @@ document.getElementById('form-agregar-sp').addEventListener('submit', async (e) 
     const res = await fetch(`/api/sp/piezas/${clave}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ piezasTotales: piezas, fecha })
+      body: JSON.stringify({ 
+        piezasTotales: piezas,
+        piezasFaltantes: piezas,
+        piezasCompletadas: 0,
+        progreso: 0,
+        fecha,
+        Oculto: false
+      })
     });
 
     if (res.ok) {
@@ -540,6 +488,9 @@ document.getElementById('form-agregar-sp').addEventListener('submit', async (e) 
       document.getElementById('form-agregar-sp').reset();
       limpiarCampos();
       await cargarRegistros();
+      await cargarSPsEnSelect();  // Para actualizar el select con los SP visibles
+      selectSp.value = '';       // Limpia el select para evitar valores previos
+      limpiarCampos();           // Limpia campos otra vez para seguridad
     } else {
       alert('Error al guardar SP');
     }
@@ -584,6 +535,8 @@ const inputPiezasTotales = document.getElementById('input-piezas-totales');
 
 const inputClaveMp = document.getElementById('input-clave-mp');
 const inputMaterial = document.getElementById('input-material');
+const inputFecha = document.getElementById('input-fecha');
+
 
 // NUEVO: input para actualizar Clave SP
 const inputClaveSp = document.getElementById('input-clave-sp');
@@ -624,7 +577,8 @@ selectActualizar.addEventListener('change', async () => {
   inputPiezasTotales.value = sp.Piezas_Totales || 0;
   inputClaveMp.value = sp.Clave_Mp || '';
   inputMaterial.value = sp.Material || '';
-  inputClaveSp.value = sp.Clave_Sp || '';  // ← NUEVO: cargar clave SP actual en el input
+  inputClaveSp.value = sp.Clave_Sp || '';
+  inputFecha.value = sp.Fecha ? sp.Fecha.slice(0, 10) : '';
 });
 
 // Al seleccionar operación
@@ -655,7 +609,8 @@ formActualizar.addEventListener('submit', async (e) => {
     piezas_totales: Number(inputPiezasTotales.value),
     operacionIndex: Number(index),
     clave_mp: inputClaveMp.value,
-    material: inputMaterial.value
+    material: inputMaterial.value,
+    fecha: inputFecha.value
   };
 
   try {
@@ -678,6 +633,37 @@ formActualizar.addEventListener('submit', async (e) => {
 });
 
 setInterval(cargarRegistros, 2500);
+
+// Escuchar clics en botones de eliminar fila y enviar petición al backend
+document.addEventListener('click', async function (e) {
+  if (e.target && e.target.classList.contains('btn-borrar-fila')) {
+    const fila = e.target.closest('tr');
+    const claveSp = fila?.querySelector('td')?.textContent?.trim(); // Se asume que la Clave_Sp está en la primera columna
+
+    if (!claveSp) {
+      console.error('No se pudo obtener la Clave_SP');
+      return;
+    }
+
+    const confirmar = confirm(`¿Seguro que deseas eliminar el SP ${claveSp}?`);
+    if (!confirmar) return;
+
+    try {
+      const res = await fetch(`/api/sp/${claveSp}/ocultar`, {
+        method: 'POST'
+      });
+
+      if (res.ok) {
+        fila.remove();
+      } else {
+        mostrarAlertaPersonalizada('No se pudo ocultar el SP en el backend');
+        console.error('Error del servidor:', res.status);
+      }
+    } catch (err) {
+      console.error('Error al enviar petición de borrado:', err);
+    }
+  }
+});
 </script>
 </body>
 </html>

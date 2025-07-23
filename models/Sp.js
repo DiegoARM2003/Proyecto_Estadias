@@ -18,7 +18,8 @@ const SpSchema = new mongoose.Schema({
   Operaciones: [OperacionSchema],
   Operacion_Actual: String,
   Clave_Mp: { type: String, default: '' },
-  Material:   { type: String, default: '' }
+  Material:   { type: String, default: '' },
+  Oculto: { type: Boolean, default: false}
 });
 
 module.exports = mongoose.model('Sp', SpSchema);

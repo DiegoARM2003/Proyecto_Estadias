@@ -1,13 +1,10 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <title>Bienvenido</title>
   <link rel="stylesheet" href="css/pantalla_secundaria.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <style>
-    
-  </style>
 </head>
 <body>
   <header>
@@ -18,27 +15,27 @@
   <div id="mensajeEmergente" class="mensaje-emergente">Siguiente operación</div>
 
   <div class="tabla-wrapper">
-  <table id="tabla-registros">
-    <thead>
-      <tr>
-        <th><strong>CLAVE SP</strong></th>
-        <th><strong>DESCRIPCIÓN</strong></th>
-        <th><strong>CLAVE MP</strong></th>
-        <th><strong>MATERIAL</strong></th>
-        <th><strong>OPERACIÓN</strong></th>
-        <th><strong>NOMBRE MAQUINA</strong></th>
-        <th><strong>CLAVE MAQUINA</strong></th>
-        <th><strong>TIEMPO MAQUINA</strong></th>
-        <th><strong>OPERACIÓN ACTUAL</strong></th>
-        <th><strong>FECHA</strong></th>
-        <th><strong>PIEZAS TOTALES</strong></th>
-        <th><strong>PIEZAS FALTANTES</strong></th>
-        <th><strong>CONTADOR</strong></th>
-        <th><strong>PROGRESO</strong></th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+    <table id="tabla-registros">
+      <thead>
+        <tr>
+          <th><strong>CLAVE SP</strong></th>
+          <th><strong>DESCRIPCIÓN</strong></th>
+          <th><strong>CLAVE MAQUINA</strong></th>
+          <th><strong>NOMBRE MAQUINA</strong></th>
+          <th><strong>TIEMPO MAQUINA</strong></th>
+          <th><strong>OPERACIÓN</strong></th>
+          <th><strong>OPERACIÓN ACTUAL</strong></th>
+          <th><strong>CLAVE MP</strong></th>
+          <th><strong>MATERIAL</strong></th>
+          <th><strong>FECHA</strong></th>
+          <th><strong>PIEZAS TOTALES</strong></th>
+          <th><strong>PIEZAS FALTANTES</strong></th>
+          <th><strong>CONTADOR</strong></th>
+          <th><strong>PROGRESO</strong></th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
   </div>
 
 <script>
@@ -48,10 +45,19 @@ welcomeText.textContent = nombre ? `Bienvenido, ${nombre}` : 'Bienvenido';
 
 async function cargarRegistros() { 
   try {
+    const tabla = document.getElementById('tabla-registros').querySelector('tbody');
+
+    // Guardar valores actuales de los inputs antes de limpiar la tabla
+    const inputs = document.querySelectorAll('.contador-input');
+    const valoresGuardados = {};
+    inputs.forEach(input => {
+      const id = input.getAttribute('data-id');
+      valoresGuardados[id] = input.value;
+    });
+
     const res = await fetch('/api/registros');
     const data = await res.json();
 
-    const tabla = document.getElementById('tabla-registros').querySelector('tbody');
     tabla.innerHTML = '';
 
     const spMap = new Map();
@@ -63,8 +69,8 @@ async function cargarRegistros() {
           id: registro.id,
           Clave_Sp: registro.Clave_Sp,
           Descripcion: registro.Descripcion,
-          Clave_Mp: registro.Clave_Mp || '',       // <-- Aquí
-          Material: registro.Material || '',       // <-- Aquí
+          Clave_Mp: registro.Clave_Mp || '',
+          Material: registro.Material || '',
           Operaciones: [{
             Operacion: registro.Operacion,
             Nombre_Maquina: registro.Nombre_Maquina,
@@ -87,7 +93,7 @@ async function cargarRegistros() {
         });
       }
     });
-   
+
     const registrosOrdenados = Array.from(spMap.values()).sort((a, b) => {
       const fechaA = a.Fecha ? new Date(a.Fecha) : new Date(0);
       const fechaB = b.Fecha ? new Date(b.Fecha) : new Date(0);
@@ -99,23 +105,27 @@ async function cargarRegistros() {
       let pasoActual = operaciones.find(op => op.Operacion === registro.Operacion_Actual) || operaciones[0];
       const pasosTexto = operaciones.map((_, idx) => `PASO ${idx + 1}`).join('<br>');
       const progresoPorcentaje = Math.floor(Math.min(100, Math.max(0, registro.Progreso || 0)));
-      const contadorHTML = `<input type="number" class="contador-input" value="${registro.Piezas_Completadas}" min="0" data-id="${registro.Clave_Sp}" />`;
+
+      // Aquí uso valor guardado o valor original si no hay guardado
+      const valorContador = valoresGuardados[registro.Clave_Sp] ?? registro.Piezas_Completadas;
+
+      const contadorHTML = `<input type="number" class="contador-input" value="${valorContador}" min="0" data-id="${registro.Clave_Sp}" />`;
       const fechaTexto = registro.Fecha ? registro.Fecha.slice(0, 10).split('-').reverse().join('/') : '';
 
       const fila = document.createElement('tr');
       fila.innerHTML = `
         <td>${registro.Clave_Sp}</td>
         <td>${registro.Descripcion}</td>
-        <td>${registro.Clave_Mp}</td>              <!-- Columna clave_mp -->
-        <td>${registro.Material}</td>               <!-- Columna material -->
-        <td>${pasosTexto}</td>
-        <td>${pasoActual.Nombre_Maquina || ''}</td>
         <td>${pasoActual.Clave_Maquina || ''}</td>
+        <td>${pasoActual.Nombre_Maquina || ''}</td>
         <td>${pasoActual.Tiempo_Maquina || ''} MIN</td>
+        <td>${pasosTexto}</td>
         <td>${registro.Operacion_Actual || ''}</td>
+        <td>${registro.Clave_Mp}</td>
+        <td>${registro.Material}</td>
         <td>${fechaTexto}</td>
         <td>${registro.Piezas_Totales}</td>
-        <td>${registro.Piezas_Totales - registro.Piezas_Completadas}</td>
+        <td>${registro.Piezas_Totales - valorContador}</td>
         <td>${contadorHTML}</td>
         <td>
           <div class="progress-wrapper">
@@ -195,36 +205,36 @@ async function cargarRegistros() {
   }
 }
 
-  function mostrarMensajeEmergente(texto) {
-    let alerta = document.createElement('div');
-    alerta.textContent = texto;
-    alerta.style.position = 'fixed';
-    alerta.style.top = '70px';
-    alerta.style.right = '20px';
-    alerta.style.backgroundColor = '#333';
-    alerta.style.color = '#fff';
-    alerta.style.padding = '10px 20px';
-    alerta.style.borderRadius = '8px';
-    alerta.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
-    alerta.style.zIndex = 1000;
+function mostrarMensajeEmergente(texto) {
+  let alerta = document.createElement('div');
+  alerta.textContent = texto;
+  alerta.style.position = 'fixed';
+  alerta.style.top = '70px';
+  alerta.style.right = '20px';
+  alerta.style.backgroundColor = '#333';
+  alerta.style.color = '#fff';
+  alerta.style.padding = '10px 20px';
+  alerta.style.borderRadius = '8px';
+  alerta.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
+  alerta.style.zIndex = 1000;
+  alerta.style.opacity = 0;
+  alerta.style.transition = 'opacity 0.5s ease';
+
+  document.body.appendChild(alerta);
+  requestAnimationFrame(() => alerta.style.opacity = 1);
+
+  setTimeout(() => {
     alerta.style.opacity = 0;
-    alerta.style.transition = 'opacity 0.5s ease';
+    setTimeout(() => alerta.remove(), 500);
+  }, 3000);
+}
 
-    document.body.appendChild(alerta);
-    requestAnimationFrame(() => alerta.style.opacity = 1);
-
-    setTimeout(() => {
-      alerta.style.opacity = 0;
-      setTimeout(() => alerta.remove(), 500);
-    }, 3000);
-  }
-
-  document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
+  cargarRegistros();
+  setInterval(() => {
     cargarRegistros();
-    setInterval(() => {
-      cargarRegistros();
-    }, 3000); // cada 3 segundos
-  });
+  }, 3000); // cada 3 segundos
+});
 </script>
 </body>
-</html> 
+</html>

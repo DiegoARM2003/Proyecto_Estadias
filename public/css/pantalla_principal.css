@@ -6,7 +6,7 @@ body {
 
 header {
     position: relative;
-    width: 125%;
+    width: 100%;
     background-color: #7c5c42;
     color: white;
     padding: 1rem 2rem;
@@ -23,7 +23,7 @@ header {
       justify-content: flex-end; /* Alineados a la derecha */
       gap: 1rem;
       margin: 1.5rem auto 2rem auto; /* Espacio arriba/abajo y centrado en ancho */
-      width: 122%; /* Hace que los botones estén alineados con la tabla */
+      width: 97%; /* Hace que los botones estén alineados con la tabla */
     }
 
 
@@ -42,7 +42,7 @@ header {
     }
 
 .tabla-wrapper {
-  padding: 0 20px; /* Espacio a los lados izquierdo y derecho */
+  padding: 0 10px; /* Espacio a los lados izquierdo y derecho */
   box-sizing: border-box;
 }
 
@@ -79,10 +79,10 @@ header {
 
 .data-table th {
   font-weight: bold;
-  font-size: 16.5px; /* ✅ corregido */
+  font-size: 12px; /* ✅ corregido */
 }
 .data-table td {
-  font-size: 17px; /* ✅ corregido */
+  font-size: 14.3px; /* ✅ corregido */
 }
 
 .modal {
@@ -270,7 +270,7 @@ header {
   display: flex;
   flex-direction: row;
   overflow-x: auto; /* habilita scroll horizontal si es necesario */
-  gap: 16px;
+  gap: 14px;
   padding: 10px 0;
   max-width: 100%;
 }
