@@ -1,0 +1,117 @@
+<!DOCTYPE html> 
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BASE DE DATOS</title>
+  <link rel="stylesheet" href="css/bd.css" />
+</head>
+<body>
+  <header>
+    <h1>BASE DE DATOS</h1>
+     <div style="display: flex; gap: 20px;">
+      <a href="/principal.html" style="color: white; text-decoration: none;"><strong>Principal</strong></a>
+      <a href="/login.html" style="color: white; text-decoration: none;"><strong>Cerrar sesión</strong></a>
+    </div>
+  </header>
+  
+
+  <div class="contenedor-buscador">
+  <input type="text" id="buscador" placeholder="Buscar.....">
+  <span class="icono-lupa">🔍</span>
+  </div>
+
+
+  <table>
+    <thead>
+      <tr>
+        <th>Clave SP</th>
+        <th>Descripción</th>
+        <th>Clave Máquina</th>
+        <th>Nombre Máquina</th>
+        <th>Tiempo Máquina</th>
+        <th>Operación</th>
+        <th>Clave MP</th>
+        <th>Material</th>
+      </tr>
+    </thead>
+    <tbody id="tabla-todos-sps">
+      <!-- SPs serán insertados aquí -->
+    </tbody>
+  </table>
+<script>
+  let datosOriginales = [];
+
+  async function cargarSPsPaso1() {
+    try {
+      const res = await fetch('/api/sp');
+      const sps = await res.json();
+
+      datosOriginales = sps
+        .filter(sp => (sp.Operaciones || []).some(op => op.Operacion?.toLowerCase() === 'paso 1'))
+        .map(sp => {
+          const paso1 = sp.Operaciones.find(op => op.Operacion?.toLowerCase() === 'paso 1');
+          return {
+            Clave_Sp: sp.Clave_Sp || '',
+            Descripcion: sp.Descripcion || '',
+            Clave_Maquina: paso1?.Clave_Maquina || '',
+            Nombre_Maquina: paso1?.Nombre_Maquina || '',
+            Tiempo_Maquina: paso1?.Tiempo_Maquina || '',
+            Operacion: paso1?.Operacion || '',
+            Clave_Mp: sp.Clave_Mp || '',
+            Material: sp.Material || ''
+          };
+        });
+
+      mostrarSPs(datosOriginales);
+    } catch (error) {
+      console.error('Error al cargar SPs:', error);
+    }
+  }
+
+  function mostrarSPs(lista) {
+    const tbody = document.getElementById('tabla-todos-sps');
+    tbody.innerHTML = '';
+
+    if (lista.length === 0) {
+      const fila = document.createElement('tr');
+      fila.innerHTML = `
+        <td colspan="8" style="text-align: center; padding: 12px; font-weight: bold;">
+          No se encontraron resultados
+        </td>
+      `;
+      tbody.appendChild(fila);
+      return;
+    }
+
+    lista.forEach(sp => {
+      const fila = document.createElement('tr');
+      fila.innerHTML = `
+        <td>${sp.Clave_Sp}</td>
+        <td>${sp.Descripcion}</td>
+        <td>${sp.Clave_Maquina}</td>
+        <td>${sp.Nombre_Maquina}</td>
+        <td>${sp.Tiempo_Maquina} MIN</td>
+        <td>${sp.Operacion}</td>
+        <td>${sp.Clave_Mp}</td>
+        <td>${sp.Material}</td>
+      `;
+      tbody.appendChild(fila);
+    });
+  }
+
+  document.getElementById('buscador').addEventListener('input', function () {
+    const texto = this.value.toLowerCase();
+    const filtrados = datosOriginales.filter(sp =>
+      Object.values(sp).some(valor =>
+        valor.toString().toLowerCase().includes(texto)
+      )
+    );
+    mostrarSPs(filtrados);
+  });
+
+  window.onload = cargarSPsPaso1;
+</script>
+
+</body>
+</html>

@@ -46,6 +46,9 @@
         const res = await fetch('/api/sp');
         let sps = await res.json();
 
+        // Filtrar solo SPs con piezas completadas > 0
+        sps = sps.filter(sp => (sp.Piezas_Completadas || 0) > 0);
+
         // Ordenar numéricamente por Clave_Sp
         sps.sort((a, b) => {
           const numA = parseInt(a.Clave_Sp.replace(/\D/g, ''), 10);

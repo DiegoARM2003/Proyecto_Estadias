@@ -1,30 +1,36 @@
 body {
-    margin: 0;
-    font-family: 'Segoe UI', sans-serif;
-    background: #f0f8ff;
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: #f0f8ff;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* evita scroll general */
 }
 
 header {
-    position: relative;
-    width: 100%;
-    background-color: #7c5c42;
-    color: white;
-    padding: 1rem 2rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    box-sizing: border-box;
-    height: 75px
-    }
+  position: relative;
+  width: 100%;
+  background-color: #7c5c42;
+  color: white;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+  height: 55px;
+  flex-shrink: 0;
+}
 
-    .admin-buttons {
-      display: flex;
-      justify-content: flex-end; /* Alineados a la derecha */
-      gap: 1rem;
-      margin: 1.5rem auto 2rem auto; /* Espacio arriba/abajo y centrado en ancho */
-      width: 97%; /* Hace que los botones estén alineados con la tabla */
-    }
+.admin-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin: 1.5rem auto 2rem auto;
+  width: 97%;
+  flex-shrink: 0;
+}
 
 
     .admin-buttons button {
@@ -42,24 +48,34 @@ header {
     }
 
 .tabla-wrapper {
-  padding: 0 10px; /* Espacio a los lados izquierdo y derecho */
+  flex-grow: 1;
+  overflow-y: auto;           
+  overflow-x: hidden;         
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 0 0.4rem;
+  margin: 1rem auto;
+  max-width: 100%;
   box-sizing: border-box;
+  margin-top: -20px;
+  position: relative;
 }
 
+/* TABLA */
 .data-table {
-  width: 100%; /* Ya no necesitas limitar el ancho aquí */
+  width: 100%;
   border-collapse: collapse;
   background-color: #fff;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  border-radius: 10px;
-  overflow: hidden;
   text-align: center;
-  margin: 0 auto;
+  table-layout: fixed;
 }
 
 .data-table thead {
+  position: sticky;
+  top: 0;
   background-color: #7c5c42;
   color: white;
+  z-index: 20;
 }
 
 .data-table th,
@@ -67,6 +83,7 @@ header {
   padding: 0.5rem;
   border: 1px solid #ddd;
   text-align: center;
+  word-wrap: break-word;
 }
 
 .data-table tbody tr:nth-child(even) {
@@ -78,11 +95,12 @@ header {
 }
 
 .data-table th {
-  font-weight: bold;
-  font-size: 12px; /* ✅ corregido */
+  font-size: 9.49px;
 }
+
+
 .data-table td {
-  font-size: 14.3px; /* ✅ corregido */
+  font-size: 13px;
 }
 
 .modal {
@@ -105,20 +123,23 @@ header {
   justify-content: center;
   align-items: center;
   padding: 1rem;
-  overflow: auto;
+  overflow: hidden;
 }
 
 .modal-content {
   background: #fff;
-  padding: 1.5rem;
+  padding: 0.5rem 1rem;
   width: 100%;
-  max-width: 600px;
+  max-width: 500px;
   border-radius: 12px;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
   animation: fadeIn 0.3s ease-in-out;
   font-family: 'Segoe UI', sans-serif;
-  max-height: 90vh;
-  overflow-y: auto;
+  font-size: 0.85rem;
+  /* clave: ajusta altura para evitar scroll */
+  max-height: 95vh;
+  overflow-y: auto; /* permite scroll SOLO si se desborda */
+  box-sizing: border-box;
 }
 
 @keyframes fadeIn {
@@ -134,12 +155,13 @@ header {
 }
 
 .modal-content input {
-  width: 100%;
-  padding: 0.6rem;
-  margin-top: 0.4rem;
+  width: 98%;
+  padding: 0.3rem;
+  margin-top: 0.22rem;
   border: 1px solid #ccc;
   border-radius: 6px;
   box-sizing: border-box;
+  font-size: 0.8rem;
 }
 
 .modal-buttons {
@@ -269,21 +291,26 @@ header {
 .operaciones-grid {
   display: flex;
   flex-direction: row;
-  overflow-x: auto; /* habilita scroll horizontal si es necesario */
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-height: 250px;         /* suficiente para mostrar 2 filas */
   gap: 14px;
-  padding: 10px 0;
-  max-width: 100%;
+  padding: 10px 0 8px 0;     /* baja el scroll hacia las cajas */
+  margin-bottom: 20px;       /* separación visual del scroll hacia los botones */
+  box-sizing: border-box;
 }
 
 .operacion-box {
-  border: 1px solid #ccc;
-  padding: 12px;
-  border-radius: 8px;
-  width: 300px;
-  min-width: 300px;
-  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* dos columnas */
+  gap: 8px 12px;                 /* espacio entre filas y columnas */
   background-color: #f9f9f9;
-  flex-shrink: 0; /* evita que se reduzcan */
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 10px;
+  min-width: 320px;
+  box-sizing: border-box;
+  flex-shrink: 0;          
 }
 
 .boton-rojo {
@@ -329,7 +356,88 @@ header {
   background: red !important;
 }
 
+#modal-actualizar .modal-content {
+  max-width: 750px; /* o el ancho que necesites */
+}
 
+#modal-actualizar .modal-content input,
+#modal-actualizar .modal-content select {
+  margin-bottom: 0.1rem;
+}
 
+.grid-2-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+#modal-nuevo .modal-content.modal-nuevo-ancho {
+  max-width: 800px;
+  max-height: 575px;
+  overflow: hidden; /* Oculta todo lo que se pase, sin scroll */
+}
+
+#modal-nuevo input.input-compact,
+#modal-nuevo select.input-compact {
+  padding: 0.4rem;
+  font-size: 1rem;
+}
+
+.operacion-box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 8px;
+  margin-bottom: 20px;
+  padding: 10px;
+  border: 2px solid #4a90e2;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+
+  /* Tamaño fijo definido por ti */
+  width: 373px;         /* Ajusta según lo necesites */
+  height: 200px;         /* O pon height: 250px; para altura fija */
+  min-width: 300px;
+
+  /* Mover un poco hacia arriba */
+  position: relative;
+  top: -20px;
+}
+
+.operacion-box > div {
+  flex: 1 1 45%; /* Dos columnas */
+  display: flex;
+  flex-direction: column;
+}
+
+.operacion-box label {
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.operacion-box input {
+  width: 100%;
+  padding: 5px;
+  box-sizing: border-box;
+
+  /* Eliminar redimensionamiento del input también */
+  resize: none;
+}
+
+.grupo-botones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 15px;
+  justify-content: flex-start;
+
+  /* Mover el grupo completo hacia arriba o abajo */
+  position: relative;
+  top: -20px; /* Ajusta este valor según necesites */
+}
+
+#modal-nuevo .modal-buttons {
+  margin-left: auto; /* Empuja el bloque completo hacia la derecha */
+  display: flex;
+  gap: 10px;
+}
 
 
