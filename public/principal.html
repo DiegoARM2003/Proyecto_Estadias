@@ -305,7 +305,9 @@ async function cargarRegistros() {
           <td>${pasoActual.Clave_Maquina || ''}</td>
           <td>${pasoActual.Nombre_Maquina || ''}</td>
           <td>${pasoActual.Tiempo_Maquina || ''} MIN</td>
-          <td>${pasoActual.Operacion || ''}</td>
+          <td>
+          ${registrosSP.map((r, i) => `${r.Operacion || ''}`).join('<br>')}
+          </td>
           <td>${pasoActual.Operacion_Actual || ''}</td>
           <td>${pasoActual.Clave_Mp || ''}</td>
           <td>${pasoActual.Material || ''}</td>
