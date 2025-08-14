@@ -5,6 +5,10 @@ const cors = require('cors');
 const path = require('path');
 const User = require('./models/User');
 const Sp = require('./models/Sp');
+const multer = require('multer');
+const xlsx = require('xlsx');
+const upload = multer({ dest: 'uploads/' });
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -357,6 +361,55 @@ app.post('/api/sp/:clave/ocultar', async (req, res) => {
   } catch (error) {
     console.error('Error ocultando SP:', error);
     res.status(500).json({ error: 'Error del servidor' });
+  }
+});
+
+// Subir Excel y agregar SPs a la base de datos
+app.post('/api/subir-excel', upload.single('archivo'), async (req, res) => {
+  try {
+    const workbook = xlsx.readFile(req.file.path);
+    const hoja = workbook.Sheets[workbook.SheetNames[0]];
+    const datos = xlsx.utils.sheet_to_json(hoja);
+
+    for (const fila of datos) {
+      const { Clave_Sp, Descripcion, Operacion, Nombre_Maquina, Clave_Maquina, Tiempo_Maquina, Piezas_Totales, Clave_Mp, Material } = fila;
+
+      let sp = await Sp.findOne({ Clave_Sp });
+
+      if (!sp) {
+        // Si no existe, crearlo
+        sp = new Sp({
+          Clave_Sp,
+          Descripcion,
+          Operaciones: [{
+            Operacion,
+            Nombre_Maquina,
+            Clave_Maquina,
+            Tiempo_Maquina
+          }],
+          Operacion_Actual: Operacion,
+          Piezas_Totales,
+          Piezas_Completadas: 0,
+          Clave_Mp,
+          Material
+        });
+      } else {
+        // Si existe, agregar operación
+        sp.Operaciones.push({
+          Operacion,
+          Nombre_Maquina,
+          Clave_Maquina,
+          Tiempo_Maquina
+        });
+      }
+
+      await sp.save();
+    }
+
+    res.json({ message: 'Datos importados correctamente' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al procesar el archivo' });
   }
 });
 

@@ -16,11 +16,21 @@
   </header>
   
 
-  <div class="contenedor-buscador">
-  <input type="text" id="buscador" placeholder="Buscar.....">
-  <span class="icono-lupa">🔍</span>
+  <div class="barra-superior">
+  <div class="contenedor-buscador"> 
+    <input type="text" id="buscador" placeholder="Buscar.....">
+    <span class="icono-lupa">🔍</span>
   </div>
 
+  <form id="form-subir-excel" enctype="multipart/form-data">
+    <label for="archivoExcel" class="btn-subir-excel">
+      📤 Subir Excel
+    </label>
+    <input type="file" id="archivoExcel" name="archivo" accept=".xlsx, .xls" required>
+  </form>
+  </div>
+
+  <div id="mensajeExcel"></div>
 
   <table>
     <thead>
@@ -39,7 +49,29 @@
       <!-- SPs serán insertados aquí -->
     </tbody>
   </table>
-<script>
+
+<style>
+  /* Mensaje flotante */
+  #mensajeExcel {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #333;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease-in-out;
+    z-index: 9999;
+  }
+  #mensajeExcel.visible {
+    opacity: 1;
+  }
+</style>
+
+<script> 
   let datosOriginales = [];
 
   async function cargarSPsPaso1() {
@@ -110,8 +142,51 @@
     mostrarSPs(filtrados);
   });
 
+  function mostrarMensaje(texto, color = 'green') {
+    const mensajeDiv = document.getElementById('mensajeExcel');
+    mensajeDiv.innerText = texto;
+    mensajeDiv.style.background = color === 'green' ? '#4CAF50' : '#E53935';
+    mensajeDiv.classList.add('visible');
+
+    setTimeout(() => {
+      mensajeDiv.classList.remove('visible');
+    }, 3000); // Se oculta en 3 segundos
+  }
+
+  // 📤 Subir archivo Excel
+  document.getElementById('archivoExcel').addEventListener('change', async function () {
+    const archivo = this.files[0];
+    if (!archivo) return;
+
+    const formData = new FormData();
+    formData.append('archivo', archivo);
+
+    mostrarMensaje('⏳ Subiendo archivo...', '#FFA000');
+
+    try {
+      const res = await fetch('/api/subir-excel', {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        mostrarMensaje('✅ ' + data.message, 'green');
+        await cargarSPsPaso1(); // Recargar tabla
+      } else {
+        mostrarMensaje('❌ Error: ' + (data.error || 'No se pudo importar'), 'red');
+      }
+    } catch (error) {
+      console.error('Error al subir archivo:', error);
+      mostrarMensaje('❌ Error al subir archivo', 'red');
+    }
+  });
+
   window.onload = cargarSPsPaso1;
 </script>
 
+<!-- El mensaje flotante -->
+<div id="mensajeExcel"></div>
 </body>
 </html>

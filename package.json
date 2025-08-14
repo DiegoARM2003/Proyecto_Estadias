@@ -16,7 +16,9 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.0",
     "express": "^5.1.0",
-    "mongoose": "^8.16.0"
+    "mongoose": "^8.16.0",
+    "multer": "^2.0.2",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/node": "^24.0.3"

@@ -139,6 +139,7 @@ header {
   /* clave: ajusta altura para evitar scroll */
   max-height: 95vh;
   overflow-y: auto; /* permite scroll SOLO si se desborda */
+  overflow: hidden; /* oculta cualquier contenido sobrante */
   box-sizing: border-box;
 }
 
@@ -214,7 +215,7 @@ header {
   border: none;
   padding: 0.5rem 1.2rem;
   border-radius: 6px;
-  font-weight: 600;
+  font-weight: 550;
   cursor: pointer;
   transition: background 0.2s;
 }

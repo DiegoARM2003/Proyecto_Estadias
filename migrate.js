@@ -1,10 +1,9 @@
 // migrate.js
 const mongoose = require('mongoose');
 const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '.env') });  // si usas .env
+require('dotenv').config({ path: path.resolve(__dirname, '.env') }); 
 const Sp = require('./models/Sp');
 
-// 🔥 Aquí pones tu misma URI que usas en app.js
 const uri = "mongodb+srv://Diego:drm200318@cluster0.ys6lboo.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
 
 async function runMigration() {
