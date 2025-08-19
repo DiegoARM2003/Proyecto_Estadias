@@ -496,15 +496,27 @@ async function cargarRegistros() {
     try {
       const res = await fetch('/api/sp');
       listaSPs = await res.json();
+
+      // 🔹 Ordena por el número que sigue al prefijo "SP"
+      listaSPs.sort((a, b) => {
+        const numA = parseInt(a.Clave_Sp.replace(/\D/g, ''), 10);
+        const numB = parseInt(b.Clave_Sp.replace(/\D/g, ''), 10);
+        return numA - numB;
+      });
+
     } catch (err) {
       console.error('Error al cargar SPs:', err);
-    }
+    } 
   }
 
   inputClaveSps.addEventListener('input', () => {
     const texto = inputClaveSps.value.toLowerCase();
     datalistClaves.innerHTML = '';
-    const filtrados = listaSPs.filter(sp => sp.Clave_Sp.toLowerCase().includes(texto));
+
+    const filtrados = listaSPs.filter(sp =>
+      sp.Clave_Sp.toLowerCase().includes(texto)
+    );
+
     filtrados.forEach(sp => {
       const option = document.createElement('option');
       option.value = sp.Clave_Sp;
